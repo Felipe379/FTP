@@ -18,13 +18,13 @@ namespace FTP.Operations
                 return $"File or folder {client.Host}{client.Path}/{newName} already exist.";
             }
 
-                var request = (FtpWebRequest)WebRequest.Create($"{client.Host}{client.Path}/{currentName}");
-                request.Credentials = new NetworkCredential(client.Username, client.Password);
-                request.Method = WebRequestMethods.Ftp.Rename;
-                request.RenameTo = newName;
+            var request = (FtpWebRequest)WebRequest.Create($"{client.Host}{client.Path}/{currentName}");
+            request.Credentials = new NetworkCredential(client.Username, client.Password);
+            request.Method = WebRequestMethods.Ftp.Rename;
+            request.RenameTo = newName;
 
-                var ftpStream = (FtpWebResponse)request.GetResponse();
-                ftpStream.Close();
+            var ftpStream = (FtpWebResponse)request.GetResponse();
+            ftpStream.Close();
 
             return null;
         }

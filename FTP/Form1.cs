@@ -230,15 +230,40 @@ namespace FTP
         {
             try
             {
-                var folderName = string.IsNullOrWhiteSpace(txt_FolderName.Text) ? "New folder" : txt_FolderName.Text;
-                if (!Regex.IsMatch(folderName, "[\\/:*?\"<>|]"))
+                var folderName = txt_FolderName.Text;
+                var currentDirectoryList = ListFiles.DirectoryListing(Client, string.Empty);
+
+                if (string.IsNullOrWhiteSpace(folderName))
                 {
+                    folderName = "New folder";
+                    var count = 0;
+
+                    while (currentDirectoryList.Any(n => n.Name == folderName))
+                    {
+                        folderName = $"{folderName.Substring(0, 10)} ({++count})";
+                    }
+
                     CreateDirectory.CreateFolder(Client, folderName);
                     RefreshFileList();
                 }
                 else
                 {
-                    MessageBox.Show("Folders can't have any of the following characters:\n\\ / : * ? \" < > |");
+                    if (!Regex.IsMatch(folderName, "[\\/:*?\"<>|]"))
+                    {
+                        if (currentDirectoryList.Any(n => n.Name == folderName))
+                        {
+                            MessageBox.Show($"File or folder {Client.Host}{Client.Path}/{folderName} already exist.");
+                        }
+                        else
+                        {
+                            CreateDirectory.CreateFolder(Client, folderName);
+                            RefreshFileList();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Folders can't have any of the following characters:\n\\ / : * ? \" < > |");
+                    }
                 }
             }
             catch (Exception ex)
