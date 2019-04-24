@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace FTP
+﻿namespace FTP
 {
     public class FtpClient
     {

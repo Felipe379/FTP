@@ -1,20 +1,16 @@
 ﻿using FTP.Operations;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace FTP
 {
-    public partial class Form1 : Form
+    public partial class FrmMain : Form
     {
-        public Form1()
+        public FrmMain()
         {
             InitializeComponent();
             Disconnected();
@@ -88,13 +84,16 @@ namespace FTP
         {
             CurrentDirectoryFileList = ListFiles.DirectoryListing(Client, string.Empty);
 
-            lst_Filelist.Items.Clear();
             lbl_Details.Text = string.Empty;
 
+            lst_Filelist.BeginUpdate();
+            lst_Filelist.Items.Clear();
             foreach (var file in CurrentDirectoryFileList)
             {
                 lst_Filelist.Items.Add($"{file.Name}");
             }
+            lst_Filelist.EndUpdate();
+
             txt_FtpCurrentDirectory.Text = Client.Host + Client.Path;
             lbl_Total.Text = CurrentDirectoryFileList.Count.ToString();
         }
