@@ -12,7 +12,7 @@ namespace FTP.Operations
         public static List<FileDetail.Details> DirectoryListing(FtpClient client, string folder)
         {
             var result = new List<FileDetail.Details>();
-            var x = $"{client.Host}{client.Path}/{folder}";
+
             var request = (FtpWebRequest)WebRequest.Create($"{client.Host}{client.Path}/{folder}");
             request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
             request.Credentials = new NetworkCredential(client.Username, client.Password);
@@ -33,27 +33,27 @@ namespace FTP.Operations
 
         public static FileDetail.Details ParseDetails(string detail)
         {
-            var regex = @"^" +
-                           @"(?<filetype>[\-ldpscbD])" +              // File type
-                           @"(?<permission>[\-rwxsStT]{9})" +         // User, Group and Other permissions
-                           @"(?<alternateaccessmethod>[@+\.]?)" +     // Altenate Access Method
-                           @"\s+" +
-                           @"(?<numberoflinks>\d+)" +                 // Number of links
-                           @"\s+" +
-                           @"(?<owner>\w+)" +                         // User name
-                           @"\s+" +
-                           @"(?<group>\w+)" +                         // Group name
-                           @"\s+" +
-                           @"(?<size>\d+)" +                          // File size
-                           @"\s+" +
-                           @"(?<month>\w{3})" +                       // Month (3 letters)
-                           @"\s+" +
-                           @"(?<day>\d{1,2})" +                       // Day (1 or 2 digits)
-                           @"\s+" +
-                           @"(?<timeyear>[\d:]{4,5})" +               // Time or year
-                           @"\s+" +
-                           @"(?<filename>(.*))" +                     // Filename
-                           @"$";
+            const string regex = @"^" +
+                                 @"(?<filetype>[\-ldpscbD])" +              // File type
+                                 @"(?<permission>[\-rwxsStT]{9})" +         // User, Group and Other permissions
+                                 @"(?<alternateaccessmethod>[@+\.]?)" +     // Altenate Access Method
+                                 @"\s+" +
+                                 @"(?<numberoflinks>\d+)" +                 // Number of links
+                                 @"\s+" +
+                                 @"(?<owner>\w+)" +                         // User name
+                                 @"\s+" +
+                                 @"(?<group>\w+)" +                         // Group name
+                                 @"\s+" +
+                                 @"(?<size>\d+)" +                          // File size
+                                 @"\s+" +
+                                 @"(?<month>\w{3})" +                       // Month (3 letters)
+                                 @"\s+" +
+                                 @"(?<day>\d{1,2})" +                       // Day (1 or 2 digits)
+                                 @"\s+" +
+                                 @"(?<timeyear>[\d:]{4,5})" +               // Time or year
+                                 @"\s+" +
+                                 @"(?<filename>(.*))" +                     // Filename
+                                 @"$";
 
             var token = new Regex(regex).Match(detail);
             var permissions = token.Groups["permission"].ToString();
@@ -77,8 +77,7 @@ namespace FTP.Operations
             fileDetail.Other.WritePermission = GetPermissionType(permissions[7]);
             fileDetail.Other.ExecutePermission = GetPermissionType(permissions[8]);
 
-            fileDetail.AlternateAccessMethod = GetAlternateAccessMethod(
-                string.IsNullOrWhiteSpace(alternateaccessmethod) ? ' ' : Convert.ToChar(alternateaccessmethod));
+            fileDetail.AlternateAccessMethod = GetAlternateAccessMethod(string.IsNullOrWhiteSpace(alternateaccessmethod) ? ' ' : Convert.ToChar(alternateaccessmethod));
 
             fileDetail.NumberOfLinks = Convert.ToInt32(token.Groups["numberoflinks"].ToString());
             fileDetail.OwnerName = token.Groups["owner"].ToString();

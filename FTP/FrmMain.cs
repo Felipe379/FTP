@@ -99,7 +99,7 @@ namespace FTP
         }
 
         private DialogResult ExceptionCatchMessageBox(Exception ex, string Error) =>
-            MessageBox.Show($"{Error}\n\nException Code:\n{ex}\n\n" +
+            MessageBox.Show($"{Error}{Environment.NewLine}{Environment.NewLine}Exception Code:{Environment.NewLine}{ex}{Environment.NewLine}{Environment.NewLine}" +
             $"Some functions may not work properly. Would you like to continue to run the program anyway?",
             "Exception error", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
 
@@ -154,35 +154,37 @@ namespace FTP
         {
             try
             {
-                var saveFileDialog = new FolderBrowserDialog();
-                var files = new List<string>();
-
-                if (lst_Filelist.SelectedIndex >= 0)
+                using (var saveFileDialog = new FolderBrowserDialog())
                 {
-                    foreach (var selectedItem in lst_Filelist.SelectedItems)
-                    {
-                        files.Add(selectedItem.ToString());
-                    }
+                    var files = new List<string>();
 
-                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    if (lst_Filelist.SelectedIndex >= 0)
                     {
-                        var failedDownloads = Download.DownloadFiles(Client, saveFileDialog.SelectedPath, files);
-
-                        if (failedDownloads.Any())
+                        foreach (var selectedItem in lst_Filelist.SelectedItems)
                         {
-                            string toDisplay = string.Join(Environment.NewLine, failedDownloads);
-                            MessageBox.Show($"Files failed to download:\n{toDisplay}");
-                            RefreshFileList();
+                            files.Add(selectedItem.ToString());
                         }
-                        else
+
+                        if (saveFileDialog.ShowDialog() == DialogResult.OK)
                         {
-                            MessageBox.Show("All files downloaded.");
+                            var failedDownloads = Download.DownloadFiles(Client, saveFileDialog.SelectedPath, files);
+
+                            if (failedDownloads.Any())
+                            {
+                                string toDisplay = string.Join(Environment.NewLine, failedDownloads);
+                                MessageBox.Show($"Files failed to download:{Environment.NewLine}{toDisplay}");
+                                RefreshFileList();
+                            }
+                            else
+                            {
+                                MessageBox.Show("All files downloaded.");
+                            }
                         }
                     }
-                }
-                else
-                {
-                    MessageBox.Show("Please, select the file(s) to download.");
+                    else
+                    {
+                        MessageBox.Show("Please, select the file(s) to download.");
+                    }
                 }
             }
             catch (Exception ex)
@@ -196,27 +198,25 @@ namespace FTP
         {
             try
             {
-                var selectFileDialog = new OpenFileDialog
+                using (var selectFileDialog = new OpenFileDialog { Multiselect = true })
                 {
-                    Multiselect = true
+                    if (selectFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var failedUploads = Upload.UploadFiles(Client, selectFileDialog.FileNames.ToList());
+
+                        if (failedUploads.Any())
+                        {
+                            string toDisplay = string.Join(Environment.NewLine, failedUploads);
+                            MessageBox.Show($"Files already exist:{Environment.NewLine}{toDisplay}");
+                        }
+                        else
+                        {
+                            MessageBox.Show("All files uploaded.");
+                        }
+                    }
+
+                    RefreshFileList();
                 };
-
-                if (selectFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    var failedUploads = Upload.UploadFiles(Client, selectFileDialog.FileNames.ToList());
-
-                    if (failedUploads.Any())
-                    {
-                        string toDisplay = string.Join(Environment.NewLine, failedUploads);
-                        MessageBox.Show($"Files already exist:\n{toDisplay}");
-                    }
-                    else
-                    {
-                        MessageBox.Show("All files uploaded.");
-                    }
-                }
-
-                RefreshFileList();
             }
             catch (Exception ex)
             {
@@ -261,7 +261,7 @@ namespace FTP
                     }
                     else
                     {
-                        MessageBox.Show("Folders can't have any of the following characters:\n\\ / : * ? \" < > |");
+                        MessageBox.Show($"Folders can't have any of the following characters:{Environment.NewLine}\\ / : * ? \" < > |");
                     }
                 }
             }
@@ -292,7 +292,7 @@ namespace FTP
                         }
                         else
                         {
-                            MessageBox.Show("Folders can't have any of the following characters:\n\\ / : * ? \" < > |");
+                            MessageBox.Show($"Folders can't have any of the following characters:{Environment.NewLine}\\ / : * ? \" < > |");
                         }
                     }
                     else
@@ -384,8 +384,8 @@ namespace FTP
 
                 if (filesNotFound.Any())
                 {
-                    string toDisplay = string.Join(Environment.NewLine, filesNotFound);
-                    MessageBox.Show($"Files failed to copy:\n{toDisplay}");
+                    var toDisplay = string.Join(Environment.NewLine, filesNotFound);
+                    MessageBox.Show($"Files failed to copy:{Environment.NewLine}{toDisplay}");
                     Refresh();
                 }
             }
